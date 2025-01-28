@@ -1,0 +1,52 @@
+[
+    {
+        "name": "Check Customer Balance",
+        "description": "Ensure customer's balance is less than or equal to credit limit.",
+        "use_case": "Check Credit",
+        "code": "Rule.constraint(validate=Customer, as_condition=lambda row: row.balance <= row.credit_limit, error_msg=\"Customer balance ({row.balance}) exceeds credit limit ({row.credit_limit})\")",
+        "error": null,
+        "status": "active",
+        "entity": "Customer",
+        "id": "01JJPG2X1XS9ZQWNCZGQAAMRW5"
+    },
+    {
+        "name": "Customer Balance Calculation",
+        "description": "Customer balance is sum of Order's amount_total where date_shipped is null.",
+        "use_case": "Check Credit",
+        "code": "Rule.sum(derive=Customer.balance, as_sum_of=Order.amount_total, where=lambda row: row.date_shipped is None)",
+        "error": null,
+        "status": "active",
+        "entity": "Customer",
+        "id": "01JJPG2X2E6CDZAE03Z1NVQTDF"
+    },
+    {
+        "name": "Order Amount Calculation",
+        "description": "Order's amount_total is the sum of Item amount.",
+        "use_case": "Check Credit",
+        "code": "Rule.sum(derive=Order.amount_total, as_sum_of=Item.amount)",
+        "error": null,
+        "status": "active",
+        "entity": "Order",
+        "id": "01JJPG2X2Q9FK8WJ5ZXFH9NPH2"
+    },
+    {
+        "name": "Item Amount Calculation",
+        "description": "Item amount is quantity times unit price.",
+        "use_case": "Check Credit",
+        "code": "Rule.formula(derive=Item.amount, as_expression=lambda row: row.quantity * row.unit_price)",
+        "error": null,
+        "status": "active",
+        "entity": "Item",
+        "id": "01JJPG2X2XK011WQ83TYPS05SA"
+    },
+    {
+        "name": "Copy Product Unit Price to Item",
+        "description": "Item's unit price is copied from Product's unit price.",
+        "use_case": "Check Credit",
+        "code": "Rule.copy(derive=Item.unit_price, from_parent=Product.price)",
+        "error": "AttributeError: type object 'Product' has no attribute 'price'",
+        "status": "accepted",
+        "entity": "Item",
+        "id": "01JJPG2X31TJ5G86PQP9ZW43NF"
+    }
+]
