@@ -1,0 +1,106 @@
+{
+    "name": "OrderSystemPro",
+    "logo": {
+        "Type": "Logo",
+        "name": "OrderSystemLogo",
+        "description": "The official logo for OrderSystemPro showcasing a modern, streamlined design."
+    },
+    "sections": [
+        {
+            "title": "Manage Orders Efficiently, Effortlessly",
+            "subtitle": "Your All-in-One Solution",
+            "name": "Home",
+            "label": "Home",
+            "content": "Welcome to **OrderSystemPro** \u2014 your ultimate solution for managing customers, orders, items, and products all in one place. Streamline your business operations and focus on what truly matters.",
+            "order": 1,
+            "Type": "Hero",
+            "images": [
+                {
+                    "Type": "Hero",
+                    "name": "MainBannerImage",
+                    "description": "A modern warehouse filled with bustling workers, representing efficient order management."
+                }
+            ]
+        },
+        {
+            "title": "About Us",
+            "subtitle": "Our Story & Mission",
+            "name": "About",
+            "label": "About",
+            "content": "**OrderSystemPro** was founded with the vision of simplifying business processes for startups and enterprises alike. We believe in providing intuitive tools that make order management not just a task, but a breeze.",
+            "order": 2,
+            "Type": "About",
+            "images": [
+                {
+                    "Type": "Background",
+                    "name": "OfficeBackgroundImage",
+                    "description": "A vibrant team meeting showcasing our collaborative office environment."
+                }
+            ]
+        },
+        {
+            "title": "Our Services",
+            "subtitle": "Comprehensive Tools for Growth",
+            "name": "Services",
+            "label": "Services",
+            "content": "Explore our cutting-edge features:  \n- **Customer Management**: Build and maintain strong customer relationships with our CRM module.  \n- **Order Tracking**: Keep tabs on orders from placement to delivery, ensuring customer satisfaction.  \n- **Product Inventory**: Organize and manage your product catalog efficiently.  \n- **Notes Feature**: Add detailed notes to each order for improved tracking and customer interactions.",
+            "order": 3,
+            "Type": "Services",
+            "images": [
+                {
+                    "Type": "Infographic",
+                    "name": "ServiceFeaturesInfographic",
+                    "description": "An infographic displaying the key services provided by OrderSystemPro."
+                }
+            ]
+        },
+        {
+            "title": "Contact Us",
+            "subtitle": "We're Here to Help",
+            "name": "Contact",
+            "label": "Contact",
+            "content": "Have questions or need further assistance? Reach out to our dedicated support team today!  \n  \n**Email**: support@ordersystempro.com  \n**Phone**: (123) 456-7890  \n**Office Hours**: Monday to Friday, 9 AM - 5 PM",
+            "order": 4,
+            "Type": "Contact",
+            "images": [
+                {
+                    "Type": "Map",
+                    "name": "OfficeLocationMap",
+                    "description": "A detailed map pinpointing our headquarters."
+                }
+            ]
+        },
+        {
+            "title": "Our Pricing",
+            "subtitle": "Flexible Plans Tailored to Your Needs",
+            "name": "Pricing",
+            "label": "Pricing",
+            "content": "Choose from our wide range of pricing plans tailored to fit businesses of all sizes:  \n- **Starter Plan**: Ideal for small teams and startups.  \n- **Professional Plan**: Perfect for growing businesses looking to expand.  \n- **Enterprise Plan**: Fully customizable solutions for large-scale operations.",
+            "order": 5,
+            "Type": "Pricing",
+            "images": [
+                {
+                    "Type": "Promotional",
+                    "name": "PricingPromotionImage",
+                    "description": "A promotional image highlighting our unique pricing plans."
+                }
+            ]
+        },
+        {
+            "title": "Customer Testimonials",
+            "subtitle": "Hear from Our Satisfied Clients",
+            "name": "Testimonials",
+            "label": "Testimonials",
+            "content": "\"OrderSystemPro transformed how we manage orders, saving us countless hours each week!\" \u2014 *Jessica, Small Business Owner*  \n\"A game-changer for our team. Detailed insights and the customer module are fantastic!\" \u2014 *Mark, Logistics Manager*",
+            "order": 6,
+            "Type": "Testimonials",
+            "images": [
+                {
+                    "Type": "Testimonial",
+                    "name": "CustomerHeadshot",
+                    "description": "A headshot of happy customers using our services."
+                }
+            ]
+        }
+    ]
+}

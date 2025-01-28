@@ -1,0 +1,310 @@
+{
+    "models": [
+        {
+            "classname": "Customer",
+            "code": "class Customer(Base):\n    __tablename__ = \"customer\"\n    \n    id = Column(Integer, primary_key=True, autoincrement=True)\n    name = Column(String, nullable=False)\n    credit_limit = Column(Decimal, nullable=False)\n    balance = Column(Decimal, nullable=False)\n",
+            "description": "Represents a customer with credit limit and balance attributes.",
+            "name": "Customer"
+        },
+        {
+            "classname": "Order",
+            "code": "class Order(Base):\n    __tablename__ = \"order\"\n    \n    id = Column(Integer, primary_key=True, autoincrement=True)\n    customer_id = Column(Integer, ForeignKey('customer.id'))\n    date_shipped = Column(DateTime)\n    amount_total = Column(Decimal, nullable=False)\n    notes = Column(String)\n",
+            "description": "Represents a customer order with reference to customer and total amount.",
+            "name": "Order"
+        },
+        {
+            "classname": "Item",
+            "code": "class Item(Base):\n    __tablename__ = \"item\"\n    \n    id = Column(Integer, primary_key=True, autoincrement=True)\n    order_id = Column(Integer, ForeignKey('order.id'))\n    product_id = Column(Integer, ForeignKey('product.id'))\n    quantity = Column(Decimal, nullable=False)\n    unit_price = Column(Decimal, nullable=False)  # Copied from Product\n    amount = Column(Decimal, nullable=False)  # Calculated as quantity * unit_price\n",
+            "description": "Represents an order item linked to a product.",
+            "name": "Item"
+        },
+        {
+            "classname": "Product",
+            "code": "class Product(Base):\n    __tablename__ = \"product\"\n    \n    id = Column(Integer, primary_key=True, autoincrement=True)\n    name = Column(String, nullable=False)\n    price = Column(Decimal, nullable=False)\n",
+            "description": "Represents a product with a price.",
+            "name": "Product"
+        },
+        {
+            "classname": "Address",
+            "code": "class Address(Base):\n    __tablename__ = \"address\"\n    \n    id = Column(Integer, primary_key=True, autoincrement=True)\n    customer_id = Column(Integer, ForeignKey('customer.id'))\n    street = Column(String)\n    city = Column(String)\n    postal_code = Column(String)",
+            "description": "Contains addresses related to a customer.",
+            "name": "Address"
+        },
+        {
+            "classname": "Payment",
+            "code": "class Payment(Base):\n    __tablename__ = \"payment\"\n    \n    id = Column(Integer, primary_key=True, autoincrement=True)\n    customer_id = Column(Integer, ForeignKey('customer.id'))\n    order_id = Column(Integer, ForeignKey('order.id'))\n    amount = Column(Decimal, nullable=False)\n    date_of_payment = Column(DateTime)\n",
+            "description": "Handles payment details related to a customer and order.",
+            "name": "Payment"
+        },
+        {
+            "classname": "Carrier",
+            "code": "class Carrier(Base):\n    __tablename__ = \"carrier\"\n    \n    id = Column(Integer, primary_key=True, autoincrement=True)\n    name = Column(String, nullable=False)\n    tracking_code = Column(String)\n",
+            "description": "Represents a shipping carrier.",
+            "name": "Carrier"
+        },
+        {
+            "classname": "OrderStatus",
+            "code": "class OrderStatus(Base):\n    __tablename__ = \"order_status\"\n    \n    id = Column(Integer, primary_key=True, autoincrement=True)\n    description = Column(String, nullable=False)\n",
+            "description": "Order status descriptions.",
+            "name": "OrderStatus"
+        },
+        {
+            "classname": "CustomerNote",
+            "code": "class CustomerNote(Base):\n    __tablename__ = \"customer_note\"\n    \n    id = Column(Integer, primary_key=True, autoincrement=True)\n    customer_id = Column(Integer, ForeignKey('customer.id'))\n    note = Column(String)\n",
+            "description": "Notes related to customer interactions.",
+            "name": "CustomerNote"
+        },
+        {
+            "classname": "Shipment",
+            "code": "class Shipment(Base):\n    __tablename__ = \"shipment\"\n    \n    id = Column(Integer, primary_key=True, autoincrement=True)\n    order_id = Column(Integer, ForeignKey('order.id'))\n    carrier_id = Column(Integer, ForeignKey('carrier.id'))\n    ship_date = Column(DateTime)\n",
+            "description": "Contains shipment details related to an order.",
+            "name": "Shipment"
+        },
+        {
+            "classname": "Warehouse",
+            "code": "class Warehouse(Base):\n    __tablename__ = \"warehouse\"\n    \n    id = Column(Integer, primary_key=True, autoincrement=True)\n    location = Column(String, nullable=False)\n",
+            "description": "Represents a warehouse location.",
+            "name": "Warehouse"
+        },
+        {
+            "classname": "Inventory",
+            "code": "class Inventory(Base):\n    __tablename__ = \"inventory\"\n    \n    id = Column(Integer, primary_key=True, autoincrement=True)\n    product_id = Column(Integer, ForeignKey('product.id'))\n    warehouse_id = Column(Integer, ForeignKey('warehouse.id'))\n    quantity = Column(Decimal, nullable=False)\n",
+            "description": "Represents product inventory at a warehouse.",
+            "name": "Inventory"
+        }
+    ],
+    "rules": [
+        {
+            "name": "Check Customer Balance",
+            "description": "Ensure customer's balance is less than or equal to credit limit.",
+            "use_case": "Check Credit",
+            "entity": "Customer",
+            "code": "Rule.constraint(validate=Customer, as_condition=lambda row: row.balance <= row.credit_limit, error_msg=\"Customer balance ({row.balance}) exceeds credit limit ({row.credit_limit})\")"
+        },
+        {
+            "name": "Customer Balance Calculation",
+            "description": "Customer balance is sum of Order's amount_total where date_shipped is null.",
+            "use_case": "Check Credit",
+            "entity": "Customer",
+            "code": "Rule.sum(derive=Customer.balance, as_sum_of=Order.amount_total, where=lambda row: row.date_shipped is None)"
+        },
+        {
+            "name": "Order Amount Calculation",
+            "description": "Order's amount_total is the sum of Item amount.",
+            "use_case": "Check Credit",
+            "entity": "Order",
+            "code": "Rule.sum(derive=Order.amount_total, as_sum_of=Item.amount)"
+        },
+        {
+            "name": "Item Amount Calculation",
+            "description": "Item amount is quantity times unit price.",
+            "use_case": "Check Credit",
+            "entity": "Item",
+            "code": "Rule.formula(derive=Item.amount, as_expression=lambda row: row.quantity * row.unit_price)"
+        },
+        {
+            "name": "Copy Product Unit Price to Item",
+            "description": "Item's unit price is copied from Product's unit price.",
+            "use_case": "Check Credit",
+            "entity": "Item",
+            "code": "Rule.copy(derive=Item.unit_price, from_parent=Product.price)"
+        }
+    ],
+    "test_data": "Test data for the models Customer, Order, Item, Product, and others.",
+    "test_data_rows": [
+        {
+            "test_data_row_variable": "customer1",
+            "code": "customer1 = Customer(id=1, name=\"Alice\", credit_limit=Decimal('5000.00'), balance=Decimal('0.00'))"
+        },
+        {
+            "test_data_row_variable": "customer2",
+            "code": "customer2 = Customer(id=2, name=\"Bob\", credit_limit=Decimal('3000.00'), balance=Decimal('0.00'))"
+        },
+        {
+            "test_data_row_variable": "customer3",
+            "code": "customer3 = Customer(id=3, name=\"Carol\", credit_limit=Decimal('4000.00'), balance=Decimal('0.00'))"
+        },
+        {
+            "test_data_row_variable": "customer4",
+            "code": "customer4 = Customer(id=4, name=\"David\", credit_limit=Decimal('3500.00'), balance=Decimal('0.00'))"
+        },
+        {
+            "test_data_row_variable": "order1",
+            "code": "order1 = Order(id=1, customer_id=1, date_shipped=None, amount_total=Decimal('0.00'), notes=\"Express delivery requested\")"
+        },
+        {
+            "test_data_row_variable": "order2",
+            "code": "order2 = Order(id=2, customer_id=2, date_shipped=None, amount_total=Decimal('0.00'), notes=\"Gift package\")"
+        },
+        {
+            "test_data_row_variable": "order3",
+            "code": "order3 = Order(id=3, customer_id=3, date_shipped=None, amount_total=Decimal('0.00'), notes=\"Ship to work address\")"
+        },
+        {
+            "test_data_row_variable": "order4",
+            "code": "order4 = Order(id=4, customer_id=4, date_shipped=None, amount_total=Decimal('0.00'), notes=\"Call before delivery\")"
+        },
+        {
+            "test_data_row_variable": "item1",
+            "code": "item1 = Item(id=1, order_id=1, product_id=1, quantity=Decimal('2.00'), unit_price=Decimal('20.00'), amount=Decimal('40.00'))"
+        },
+        {
+            "test_data_row_variable": "item2",
+            "code": "item2 = Item(id=2, order_id=2, product_id=2, quantity=Decimal('1.00'), unit_price=Decimal('15.00'), amount=Decimal('15.00'))"
+        },
+        {
+            "test_data_row_variable": "item3",
+            "code": "item3 = Item(id=3, order_id=3, product_id=3, quantity=Decimal('3.00'), unit_price=Decimal('10.00'), amount=Decimal('30.00'))"
+        },
+        {
+            "test_data_row_variable": "item4",
+            "code": "item4 = Item(id=4, order_id=4, product_id=4, quantity=Decimal('4.00'), unit_price=Decimal('5.00'), amount=Decimal('20.00'))"
+        },
+        {
+            "test_data_row_variable": "product1",
+            "code": "product1 = Product(id=1, name=\"Widget\", price=Decimal('20.00'))"
+        },
+        {
+            "test_data_row_variable": "product2",
+            "code": "product2 = Product(id=2, name=\"Gadget\", price=Decimal('15.00'))"
+        },
+        {
+            "test_data_row_variable": "product3",
+            "code": "product3 = Product(id=3, name=\"Doohickey\", price=Decimal('10.00'))"
+        },
+        {
+            "test_data_row_variable": "product4",
+            "code": "product4 = Product(id=4, name=\"Thingamajig\", price=Decimal('5.00'))"
+        },
+        {
+            "test_data_row_variable": "address1",
+            "code": "address1 = Address(id=1, customer_id=1, street=\"123 Main St\", city=\"Anytown\", postal_code=\"12345\")"
+        },
+        {
+            "test_data_row_variable": "address2",
+            "code": "address2 = Address(id=2, customer_id=2, street=\"456 Side St\", city=\"Othertown\", postal_code=\"67890\")"
+        },
+        {
+            "test_data_row_variable": "address3",
+            "code": "address3 = Address(id=3, customer_id=3, street=\"789 Back St\", city=\"Thistown\", postal_code=\"54321\")"
+        },
+        {
+            "test_data_row_variable": "address4",
+            "code": "address4 = Address(id=4, customer_id=4, street=\"101 Front St\", city=\"Newtown\", postal_code=\"98765\")"
+        },
+        {
+            "test_data_row_variable": "payment1",
+            "code": "payment1 = Payment(id=1, customer_id=1, order_id=1, amount=Decimal('40.00'), date_of_payment=date(2023, 10, 13))"
+        },
+        {
+            "test_data_row_variable": "payment2",
+            "code": "payment2 = Payment(id=2, customer_id=2, order_id=2, amount=Decimal('15.00'), date_of_payment=date(2023, 10, 14))"
+        },
+        {
+            "test_data_row_variable": "payment3",
+            "code": "payment3 = Payment(id=3, customer_id=3, order_id=3, amount=Decimal('30.00'), date_of_payment=date(2023, 10, 15))"
+        },
+        {
+            "test_data_row_variable": "payment4",
+            "code": "payment4 = Payment(id=4, customer_id=4, order_id=4, amount=Decimal('20.00'), date_of_payment=date(2023, 10, 16))"
+        },
+        {
+            "test_data_row_variable": "carrier1",
+            "code": "carrier1 = Carrier(id=1, name=\"FastShip\", tracking_code=\"FS123\")"
+        },
+        {
+            "test_data_row_variable": "carrier2",
+            "code": "carrier2 = Carrier(id=2, name=\"QuickDelivery\", tracking_code=\"QD456\")"
+        },
+        {
+            "test_data_row_variable": "carrier3",
+            "code": "carrier3 = Carrier(id=3, name=\"ShipNow\", tracking_code=\"SN789\")"
+        },
+        {
+            "test_data_row_variable": "carrier4",
+            "code": "carrier4 = Carrier(id=4, name=\"DeliverIt\", tracking_code=\"DI101\")"
+        },
+        {
+            "test_data_row_variable": "order_status1",
+            "code": "order_status1 = OrderStatus(id=1, description=\"Pending\")"
+        },
+        {
+            "test_data_row_variable": "order_status2",
+            "code": "order_status2 = OrderStatus(id=2, description=\"Shipped\")"
+        },
+        {
+            "test_data_row_variable": "order_status3",
+            "code": "order_status3 = OrderStatus(id=3, description=\"Delivered\")"
+        },
+        {
+            "test_data_row_variable": "order_status4",
+            "code": "order_status4 = OrderStatus(id=4, description=\"Cancelled\")"
+        },
+        {
+            "test_data_row_variable": "customer_note1",
+            "code": "customer_note1 = CustomerNote(id=1, customer_id=1, note=\"VIP customer\")"
+        },
+        {
+            "test_data_row_variable": "customer_note2",
+            "code": "customer_note2 = CustomerNote(id=2, customer_id=2, note=\"Frequent complaints\")"
+        },
+        {
+            "test_data_row_variable": "customer_note3",
+            "code": "customer_note3 = CustomerNote(id=3, customer_id=3, note=\"Early adopter\")"
+        },
+        {
+            "test_data_row_variable": "customer_note4",
+            "code": "customer_note4 = CustomerNote(id=4, customer_id=4, note=\"No returns\")"
+        },
+        {
+            "test_data_row_variable": "shipment1",
+            "code": "shipment1 = Shipment(id=1, order_id=1, carrier_id=1, ship_date=date(2023, 9, 30))"
+        },
+        {
+            "test_data_row_variable": "shipment2",
+            "code": "shipment2 = Shipment(id=2, order_id=2, carrier_id=2, ship_date=date(2023, 9, 27))"
+        },
+        {
+            "test_data_row_variable": "shipment3",
+            "code": "shipment3 = Shipment(id=3, order_id=3, carrier_id=3, ship_date=date(2023, 10, 2))"
+        },
+        {
+            "test_data_row_variable": "shipment4",
+            "code": "shipment4 = Shipment(id=4, order_id=4, carrier_id=4, ship_date=date(2023, 10, 1))"
+        },
+        {
+            "test_data_row_variable": "warehouse1",
+            "code": "warehouse1 = Warehouse(id=1, location=\"North Facility\")"
+        },
+        {
+            "test_data_row_variable": "warehouse2",
+            "code": "warehouse2 = Warehouse(id=2, location=\"South Facility\")"
+        },
+        {
+            "test_data_row_variable": "warehouse3",
+            "code": "warehouse3 = Warehouse(id=3, location=\"East Facility\")"
+        },
+        {
+            "test_data_row_variable": "warehouse4",
+            "code": "warehouse4 = Warehouse(id=4, location=\"West Facility\")"
+        },
+        {
+            "test_data_row_variable": "inventory1",
+            "code": "inventory1 = Inventory(id=1, product_id=1, warehouse_id=1, quantity=Decimal('100.00'))"
+        },
+        {
+            "test_data_row_variable": "inventory2",
+            "code": "inventory2 = Inventory(id=2, product_id=2, warehouse_id=2, quantity=Decimal('150.00'))"
+        },
+        {
+            "test_data_row_variable": "inventory3",
+            "code": "inventory3 = Inventory(id=3, product_id=3, warehouse_id=3, quantity=Decimal('200.00'))"
+        },
+        {
+            "test_data_row_variable": "inventory4",
+            "code": "inventory4 = Inventory(id=4, product_id=4, warehouse_id=4, quantity=Decimal('250.00'))"
+        }
+    ],
+    "test_data_sqlite": "INSERT INTO customer (id, name, credit_limit, balance) VALUES (1, 'Alice', '5000.00', '0.00');\nINSERT INTO customer (id, name, credit_limit, balance) VALUES (2, 'Bob', '3000.00', '0.00');\nINSERT INTO customer (id, name, credit_limit, balance) VALUES (3, 'Carol', '4000.00', '0.00');\nINSERT INTO customer (id, name, credit_limit, balance) VALUES (4, 'David', '3500.00', '0.00');\n\nINSERT INTO product (id, name, price) VALUES (1, 'Widget', '20.00');\nINSERT INTO product (id, name, price) VALUES (2, 'Gadget', '15.00');\nINSERT INTO product (id, name, price) VALUES (3, 'Doohickey', '10.00');\nINSERT INTO product (id, name, price) VALUES (4, 'Thingamajig', '5.00');\n\nINSERT INTO order (id, customer_id, date_shipped, amount_total, notes) VALUES (1, 1, NULL, '40.00', 'Express delivery requested');\nINSERT INTO order (id, customer_id, date_shipped, amount_total, notes) VALUES (2, 2, NULL, '15.00', 'Gift package');\nINSERT INTO order (id, customer_id, date_shipped, amount_total, notes) VALUES (3, 3, NULL, '30.00', 'Ship to work address');\nINSERT INTO order (id, customer_id, date_shipped, amount_total, notes) VALUES (4, 4, NULL, '20.00', 'Call before delivery');\n\nINSERT INTO item (id, order_id, product_id, quantity, unit_price, amount) VALUES (1, 1, 1, '2.00', '20.00', '40.00');\nINSERT INTO item (id, order_id, product_id, quantity, unit_price, amount) VALUES (2, 2, 2, '1.00', '15.00', '15.00');\nINSERT INTO item (id, order_id, product_id, quantity, unit_price, amount) VALUES (3, 3, 3, '3.00', '10.00', '30.00');\nINSERT INTO item (id, order_id, product_id, quantity, unit_price, amount) VALUES (4, 4, 4, '4.00', '5.00', '20.00');",
+    "name": "E-Commerce System"
+}
